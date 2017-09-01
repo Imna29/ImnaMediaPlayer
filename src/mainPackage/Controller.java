@@ -1,12 +1,9 @@
 package mainPackage;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.media.AudioSpectrumListener;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -43,8 +40,8 @@ public class Controller implements Initializable {
 
     private void init() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Music", "*.mp3", "*.waw"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Video", "*.mp4"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Media", "*.mp3", "*.waw", "*.mp4",
+                "*.aac",".pcm","*.avc","*.flv","*.fxm","*.wav"));
 
         File mediaFile = fileChooser.showOpenDialog(new Stage());
         media = new Media(mediaFile.toURI().toString());
