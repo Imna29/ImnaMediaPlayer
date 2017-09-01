@@ -84,9 +84,12 @@ public class Controller implements Initializable {
 
         mediaPlayer.setAudioSpectrumThreshold(-80);
 
-        canvas1.widthProperty().addListener((observable, oldValue, newValue) -> {
-            mediaPlayer.setAudioSpectrumNumBands(newValue.intValue()/4);
-            System.out.println(mediaPlayer.getAudioSpectrumNumBands());
+        canvas1.widthProperty().addListener((observable, oldValue, newValue) -> mediaPlayer.setAudioSpectrumNumBands(newValue.intValue()/4));
+
+        mediaPlayer.setOnEndOfMedia(() -> {
+            if(loop){
+                mediaPlayer.seek(Duration.ZERO);
+            }
         });
 
 
@@ -153,7 +156,7 @@ public class Controller implements Initializable {
         }
     }
 
-    public void backRequested(ActionEvent actionEvent) {
+    public void backRequested() {
         mediaPlayer.seek(mediaPlayer.getCurrentTime().subtract(Duration.seconds(5)));
 
     }
@@ -168,7 +171,7 @@ public class Controller implements Initializable {
         }
     }
 
-    public void forwardRequested(ActionEvent actionEvent) {
+    public void forwardRequested() {
         mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(5)));
     }
 
