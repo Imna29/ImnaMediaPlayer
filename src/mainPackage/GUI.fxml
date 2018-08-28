@@ -14,46 +14,49 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.media.MediaView?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainPackage.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+            prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="mainPackage.Controller">
     <bottom>
         <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
-                <Button mnemonicParsing="false" onAction="#backRequested" text="&lt;" />
-                <Button mnemonicParsing="false" onAction="#controlRequested" text="||" />
-                <Button mnemonicParsing="false" onAction="#forwardRequested" text="&gt;" />
-                <Slider fx:id="timeSlider" />
-            <Label text="00:00/00:00" fx:id="timeLabel"/>
-                <ComboBox>
+                <Button mnemonicParsing="false" onAction="#backRequested" text="&lt;"/>
+                <Button mnemonicParsing="false" onAction="#controlRequested" text="||"/>
+                <Button mnemonicParsing="false" onAction="#forwardRequested" text="&gt;"/>
+                <Slider fx:id="timeSlider"/>
+                <Label fx:id="timeLabel" text="00:00/00:00"/>
+                <ComboBox prefHeight="31.0" prefWidth="0.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
-                            <Slider fx:id="volumeSlider" orientation="VERTICAL" />
+                            <Slider fx:id="volumeSlider" orientation="VERTICAL"/>
                         </FXCollections>
                     </items>
                 </ComboBox>
-                <CheckBox mnemonicParsing="false" onAction="#loopChecked" text="Loop" />
-            <CheckBox mnemonicParsing="false" onAction="#ratioChecked" text="Ratio" />
+                <CheckBox mnemonicParsing="false" onAction="#loopChecked" text="Loop"/>
+                <CheckBox mnemonicParsing="false" onAction="#ratioChecked" text="Ratio"/>
             </items>
         </ToolBar>
     </bottom>
-   <center>
-      <TabPane fx:id="tabs" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-        <tabs>
-          <Tab text="Visual">
-               <content>
-                  <StackPane prefHeight="150.0" prefWidth="200.0">
-                     <children>
-                        <Canvas fx:id="canvas1" height="320.0" width="10" />
-                        <Canvas fx:id="canvas2" height="320.0" width="10" />
-                     </children>
-                  </StackPane>
-               </content>
-          </Tab>
-          <Tab text="Media">
-               <content>
-                  <MediaView fx:id="mediaView" fitHeight="320.0" fitWidth="600.0" preserveRatio="false" />
-               </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </center>
+    <center>
+        <TabPane fx:id="tabs" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE"
+                 BorderPane.alignment="CENTER">
+            <tabs>
+                <Tab text="Visual">
+                    <content>
+                        <StackPane prefHeight="150.0" prefWidth="200.0">
+                            <children>
+                                <Canvas fx:id="canvas1" height="320.0" width="10"/>
+                                <Canvas fx:id="canvas2" height="320.0" width="10"/>
+                            </children>
+                        </StackPane>
+                    </content>
+                </Tab>
+                <Tab text="Media">
+                    <content>
+                        <MediaView fx:id="mediaView" fitHeight="320.0" fitWidth="600.0" preserveRatio="false"/>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
 </BorderPane>
