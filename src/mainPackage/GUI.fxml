@@ -34,6 +34,7 @@
                 </ComboBox>
                 <CheckBox mnemonicParsing="false" onAction="#loopChecked" text="Loop"/>
                 <CheckBox mnemonicParsing="false" onAction="#ratioChecked" text="Ratio"/>
+                <Button>Open File</Button>
             </items>
         </ToolBar>
     </bottom>
