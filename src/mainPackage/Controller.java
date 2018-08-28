@@ -1,6 +1,7 @@
 package mainPackage;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -39,15 +40,8 @@ public class Controller implements Initializable {
     }
 
     private void init() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Media", "*.mp3", "*.waw", "*.mp4",
-                "*.aac",".pcm","*.avc","*.flv","*.fxm","*.wav"));
-
-        File mediaFile = fileChooser.showOpenDialog(new Stage());
-        media = new Media(mediaFile.toURI().toString());
-        mediaPlayer = new MediaPlayer(media);
-        mediaView.setMediaPlayer(mediaPlayer);
-        mediaView.getMediaPlayer().play();
+        if (mediaPlayer == null || mediaPlayer.getMedia() == null)
+            return;
 
         timeSlider.setOnMousePressed(event -> mousePressed = true);
         timeSlider.setOnMouseReleased(event -> {
@@ -84,23 +78,22 @@ public class Controller implements Initializable {
 
         mediaPlayer.setAudioSpectrumThreshold(-80);
 
-        canvas1.widthProperty().addListener((observable, oldValue, newValue) -> mediaPlayer.setAudioSpectrumNumBands(newValue.intValue()/4));
+        canvas1.widthProperty().addListener((observable, oldValue, newValue) -> mediaPlayer.setAudioSpectrumNumBands(newValue.intValue() / 4));
 
         mediaPlayer.setOnEndOfMedia(() -> {
-            if(loop){
+            if (loop) {
                 mediaPlayer.seek(Duration.ZERO);
             }
         });
 
 
-
         mediaPlayer.setAudioSpectrumListener((timestamp, duration, magnitudes, phases) -> {
             canvas1.getGraphicsContext2D().clearRect(0, 0, canvas1.getWidth(), canvas1.getHeight());
             canvas2.getGraphicsContext2D().clearRect(0, 0, canvas1.getWidth(), canvas1.getHeight());
-            for (int index = 0; index <  mediaPlayer.getAudioSpectrumNumBands(); index++) {
+            for (int index = 0; index < mediaPlayer.getAudioSpectrumNumBands(); index++) {
                 double location = canvas1.getWidth() / mediaPlayer.getAudioSpectrumNumBands() * index;
                 double width = canvas1.getWidth() / mediaPlayer.getAudioSpectrumNumBands();
-                double height = 80+magnitudes[index];
+                double height = 80 + magnitudes[index];
 
                 canvas1.getGraphicsContext2D().strokeRect(location, canvas1.getHeight() / 2, width, height);
                 canvas2.getGraphicsContext2D().strokeRect(location, canvas2.getHeight() / 2, width, height);
@@ -115,6 +108,56 @@ public class Controller implements Initializable {
         tabs.heightProperty().addListener(((observable, oldValue, newValue) -> mediaView.setFitHeight((Double) newValue)));
 
 
+    }
+
+    @FXML
+    private void openFile(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Media", "*.mp3", "*.waw", "*.mp4",
+                "*.aac", ".pcm", "*.avc", "*.flv", "*.fxm", "*.wav"));
+
+        File mediaFile = fileChooser.showOpenDialog(new Stage());
+        if (mediaFile == null || !mediaFile.exists()) {
+            //TODO warn the user that the file they have selected no longer exists
+            return;
+        }
+
+        playMedia(mediaFile);
+    }
+
+    private void playMedia(File mediaFile) {
+        media = new Media(mediaFile.toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+        mediaView.setMediaPlayer(mediaPlayer);
+        mediaView.getMediaPlayer().play();
+        init();
+    }
+
+    public void forwardRequested() {
+        mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(5)));
+    }
+
+    public void loopChecked(ActionEvent actionEvent) {
+        loop = ((CheckBox) actionEvent.getSource()).isSelected();
+    }
+
+    public void ratioChecked(ActionEvent actionEvent) {
+        mediaView.setPreserveRatio(((CheckBox) actionEvent.getSource()).isSelected());
+    }
+
+    public void backRequested() {
+        mediaPlayer.seek(mediaPlayer.getCurrentTime().subtract(Duration.seconds(5)));
+
+    }
+
+    public void controlRequested(ActionEvent actionEvent) {
+        if (mediaPlayer.getStatus().equals(MediaPlayer.Status.PLAYING)) {
+            mediaPlayer.pause();
+            ((Button) actionEvent.getSource()).setText(">>");
+        } else if (mediaPlayer.getStatus().equals(MediaPlayer.Status.PAUSED)) {
+            mediaPlayer.play();
+            ((Button) actionEvent.getSource()).setText("||");
+        }
     }
 
     private static String formatTime(Duration elapsed, Duration duration) {
@@ -154,32 +197,5 @@ public class Controller implements Initializable {
                         elapsedSeconds);
             }
         }
-    }
-
-    public void backRequested() {
-        mediaPlayer.seek(mediaPlayer.getCurrentTime().subtract(Duration.seconds(5)));
-
-    }
-
-    public void controlRequested(ActionEvent actionEvent) {
-        if (mediaPlayer.getStatus().equals(MediaPlayer.Status.PLAYING)) {
-            mediaPlayer.pause();
-            ((Button) actionEvent.getSource()).setText(">>");
-        }else if(mediaPlayer.getStatus().equals(MediaPlayer.Status.PAUSED)){
-            mediaPlayer.play();
-            ((Button) actionEvent.getSource()).setText("||");
-        }
-    }
-
-    public void forwardRequested() {
-        mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(5)));
-    }
-
-    public void loopChecked(ActionEvent actionEvent) {
-        loop = ((CheckBox) actionEvent.getSource()).isSelected();
-    }
-
-    public void ratioChecked(ActionEvent actionEvent) {
-        mediaView.setPreserveRatio(((CheckBox) actionEvent.getSource()).isSelected());
     }
 }
