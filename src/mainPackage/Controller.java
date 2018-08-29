@@ -63,10 +63,8 @@ public class Controller implements Initializable {
             mediaPlayer.seek(Duration.seconds((media.getDuration().toSeconds() * timeSlider.getValue()) / 100));
             mousePressed = false;
         });
-
+        mediaPlayer.setVolume(volumeSlider.getValue());
         volumeSlider.valueProperty().bindBidirectional(mediaPlayer.volumeProperty());
-        volumeSlider.setMax(1);
-        volumeSlider.setBlockIncrement(0.1);
 
         mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
             if ((int) newValue.toSeconds() > (int) oldValue.toSeconds()) {
