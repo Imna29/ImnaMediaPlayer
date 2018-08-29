@@ -19,7 +19,7 @@
                 <ComboBox prefHeight="31.0" prefWidth="0.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
-                            <Slider fx:id="volumeSlider" orientation="VERTICAL"/>
+                            <Slider fx:id="volumeSlider" orientation="VERTICAL" max="1" blockIncrement="0.1"/>
                         </FXCollections>
                     </items>
                 </ComboBox>
