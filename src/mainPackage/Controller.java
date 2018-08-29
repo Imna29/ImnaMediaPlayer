@@ -1,5 +1,8 @@
 package mainPackage;
 
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,31 +18,43 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import static java.lang.Math.floor;
 import static java.lang.String.format;
 
 public class Controller implements Initializable {
-
-    public Slider timeSlider;
-    public Slider volumeSlider;
-    public MediaView mediaView;
-    public TabPane tabs;
-    public Label timeLabel;
-    public Canvas canvas1;
-    public Canvas canvas2;
-    private MediaPlayer mediaPlayer;
-    private Media media;
+    @FXML
+    private Slider timeSlider;
+    @FXML
+    private Slider volumeSlider;
+    @FXML
+    private MediaView mediaView;
+    @FXML
+    private TabPane tabs;
+    @FXML
+    private Label timeLabel;
+    @FXML
+    private Canvas canvas1;
+    @FXML
+    private Canvas canvas2;
+    @FXML
+    private ListView directoryList;
     private boolean loop;
     private boolean mousePressed;
+    private HashMap<String, File> fileHashMap = new HashMap<>();
+
+    private String audioExtensions[] = {"*.mp3", "*.aif", "*.aiff", "*.wav"};
+    private String videoExtensions[] = {"*.mp4", "*.m4a", "*.flv", "*.fxm", "*.m4v"};
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        init();
+
     }
 
-    private void init() {
+    private void init(MediaPlayer mediaPlayer, Media media) {
         if (mediaPlayer == null || mediaPlayer.getMedia() == null)
             return;
 
@@ -52,7 +67,6 @@ public class Controller implements Initializable {
         volumeSlider.valueProperty().bindBidirectional(mediaPlayer.volumeProperty());
         volumeSlider.setMax(1);
         volumeSlider.setBlockIncrement(0.1);
-        volumeSlider.setValue(0.2);
 
         mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
             if ((int) newValue.toSeconds() > (int) oldValue.toSeconds()) {
@@ -78,7 +92,9 @@ public class Controller implements Initializable {
 
         mediaPlayer.setAudioSpectrumThreshold(-80);
 
+        mediaPlayer.setAudioSpectrumNumBands((int) canvas1.getWidth() / 4);
         canvas1.widthProperty().addListener((observable, oldValue, newValue) -> mediaPlayer.setAudioSpectrumNumBands(newValue.intValue() / 4));
+
 
         mediaPlayer.setOnEndOfMedia(() -> {
             if (loop) {
@@ -100,41 +116,100 @@ public class Controller implements Initializable {
             }
 
         });
-
-        canvas2.setOnMouseClicked(event -> mediaPlayer.setAudioSpectrumNumBands(3));
-
-
         tabs.widthProperty().addListener((observable, oldValue, newValue) -> mediaView.setFitWidth((Double) newValue));
         tabs.heightProperty().addListener(((observable, oldValue, newValue) -> mediaView.setFitHeight((Double) newValue)));
-
-
     }
 
     @FXML
     private void openFile(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Media", "*.mp3", "*.waw", "*.mp4",
-                "*.aac", ".pcm", "*.avc", "*.flv", "*.fxm", "*.wav"));
+        String[] extensions = new String[audioExtensions.length + videoExtensions.length];
+        System.arraycopy(audioExtensions, 0, extensions, 0, audioExtensions.length);
+        System.arraycopy(videoExtensions, 0, extensions, audioExtensions.length, videoExtensions.length);
 
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Media", extensions));
         File mediaFile = fileChooser.showOpenDialog(new Stage());
         if (mediaFile == null || !mediaFile.exists()) {
             //TODO warn the user that the file they have selected no longer exists
             return;
         }
-
         playMedia(mediaFile);
+        scanDirectory(mediaFile);
+    }
+
+    private void scanDirectory(File mediaFile) {
+        ArrayList<File> mediaFiles = new ArrayList<>();
+
+        File directory = mediaFile.getParentFile();
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                for (String audioEnding : audioExtensions) {
+                    if (file.getName().endsWith(audioEnding.substring(1))) {
+                        mediaFiles.add(file);
+                        break;
+                    }
+                }
+                for (String videoEnding : videoExtensions) {
+                    if (file.getName().endsWith(videoEnding.substring(1))) {
+                        mediaFiles.add(file);
+                        break;
+                    }
+                }
+            }
+        }
+
+        populateList(mediaFiles);
+    }
+
+    private void populateList(ArrayList<File> files) {
+        ObservableList<String> data = FXCollections.observableArrayList();
+        for (File file : files) {
+            Media media = new Media(file.toURI().toString());
+            media.getMetadata().addListener((MapChangeListener<String, Object>) change -> {
+                if (change.getKey().equals("title")) {
+                    String path = media.getSource().substring(6);
+                    fileHashMap.put(change.getValueAdded().toString(), new File(path.replaceAll("%20", " ")));
+                    data.add(change.getValueAdded().toString());
+                }
+            });
+        }
+        directoryList.setItems(data);
+        directoryList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            playMedia(fileHashMap.get(newValue.toString()));
+        });
+
     }
 
     private void playMedia(File mediaFile) {
-        media = new Media(mediaFile.toURI().toString());
-        mediaPlayer = new MediaPlayer(media);
+        if (mediaView.getMediaPlayer() != null) {
+            mediaView.getMediaPlayer().dispose();
+        }
+        Media media = new Media(mediaFile.toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaView.setMediaPlayer(mediaPlayer);
         mediaView.getMediaPlayer().play();
-        init();
+
+        toggleMediaTab(true);
+        for (String ext : videoExtensions) {
+            if (mediaView.getMediaPlayer().getMedia().getSource().endsWith(ext.substring(1))) {
+                toggleMediaTab(false);
+            }
+        }
+        init(mediaPlayer, media);
+    }
+
+    private void toggleMediaTab(boolean toggle) {
+        tabs.getTabs().get(1).setDisable(toggle);
+        if (toggle) {
+            tabs.getSelectionModel().select(0);
+        } else {
+            tabs.getSelectionModel().select(1);
+        }
     }
 
     public void forwardRequested() {
-        mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(5)));
+        mediaView.getMediaPlayer().seek(mediaView.getMediaPlayer().getCurrentTime().add(Duration.seconds(5)));
     }
 
     public void loopChecked(ActionEvent actionEvent) {
@@ -146,16 +221,16 @@ public class Controller implements Initializable {
     }
 
     public void backRequested() {
-        mediaPlayer.seek(mediaPlayer.getCurrentTime().subtract(Duration.seconds(5)));
+        mediaView.getMediaPlayer().seek(mediaView.getMediaPlayer().getCurrentTime().subtract(Duration.seconds(5)));
 
     }
 
     public void controlRequested(ActionEvent actionEvent) {
-        if (mediaPlayer.getStatus().equals(MediaPlayer.Status.PLAYING)) {
-            mediaPlayer.pause();
+        if (mediaView.getMediaPlayer().getStatus().equals(MediaPlayer.Status.PLAYING)) {
+            mediaView.getMediaPlayer().pause();
             ((Button) actionEvent.getSource()).setText(">>");
-        } else if (mediaPlayer.getStatus().equals(MediaPlayer.Status.PAUSED)) {
-            mediaPlayer.play();
+        } else if (mediaView.getMediaPlayer().getStatus().equals(MediaPlayer.Status.PAUSED)) {
+            mediaView.getMediaPlayer().play();
             ((Button) actionEvent.getSource()).setText("||");
         }
     }
