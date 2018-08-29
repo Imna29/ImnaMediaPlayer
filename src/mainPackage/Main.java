@@ -16,6 +16,8 @@ public class Main extends Application {
         primaryStage.setTitle("Imna Media Player");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+        primaryStage.setMinHeight(428);
+        primaryStage.setMinWidth(614);
         System.out.println("Started the program");
     }
 

@@ -3,14 +3,13 @@
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.media.MediaView?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
-            prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0"
+            xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="mainPackage.Controller">
     <bottom>
-        <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <ToolBar minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
             <items>
                 <Button mnemonicParsing="false" onAction="#backRequested" text="&lt;"/>
                 <Button mnemonicParsing="false" onAction="#controlRequested" text="||"/>
@@ -31,20 +30,25 @@
         </ToolBar>
     </bottom>
     <center>
-        <TabPane fx:id="tabs" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE"
+        <TabPane fx:id="tabs" minHeight="0.0" minWidth="0.0" tabClosingPolicy="UNAVAILABLE"
                  BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Visual">
-                    <content>
-                        <StackPane prefHeight="150.0" prefWidth="200.0">
-                            <children>
-                                <Canvas fx:id="canvas1" height="320.0" width="10"/>
-                                <Canvas fx:id="canvas2" height="320.0" width="10"/>
-                            </children>
-                        </StackPane>
-                    </content>
+
+                    <HBox minHeight="0.0" minWidth="0.0">
+                        <children>
+                            <StackPane minHeight="0.0" minWidth="0.0">
+                                <children>
+                                    <Canvas fx:id="canvas1" height="320.0" width="10"/>
+                                    <Canvas fx:id="canvas2" height="320.0" width="10"/>
+                                </children>
+                            </StackPane>
+                            <ListView minHeight="0.0" minWidth="0.0" fx:id="directoryList"/>
+                        </children>
+                    </HBox>
+
                 </Tab>
-                <Tab text="Media">
+                <Tab disable="true" text="Media">
                     <content>
                         <MediaView fx:id="mediaView" fitHeight="320.0" fitWidth="600.0" preserveRatio="false"/>
                     </content>
